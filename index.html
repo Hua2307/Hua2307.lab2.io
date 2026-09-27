@@ -1,1 +1,52 @@
-<h1>Hello World</h1>
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hua2307 - Personal Page</title>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <style>
+        body { font-family: sans-serif; background-color: #f4f6f9; color: #333; max-width: 700px; margin: 40px auto; padding: 20px; }
+        .card { background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); text-align: center; }
+        h1 { color: #2c3e50; }
+        .btn { background-color: #3498db; color: white; border: none; padding: 10px 20px; font-size: 16px; border-radius: 6px; cursor: pointer; margin-top: 15px; }
+        .btn:hover { background-color: #2980b9; }
+        #quote-container { margin-top: 25px; padding: 15px; background-color: #f8f9fa; border-left: 4px solid #3498db; border-radius: 4px; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>Hello, 我是 Hua2307 👋</h1>
+        <p>歡迎來到我的 GitHub Personal Page！這是我在 Web 基本原理與技術課程中建立的個人網站。</p>
+        <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
+        <h3>💡 jQuery & Ajax 實作示範</h3>
+        <p>點擊下方按鈕，會透過 jQuery Ajax 向公開 API 請求名言 JSON 資料：</p>
+        <button id="get-quote-btn" class="btn">取得每日隨機名言</button>
+        <div id="quote-container">
+            <p id="quote-text"><i>點擊按鈕載入名言...</i></p>
+            <p id="quote-author" style="font-weight: bold; text-align: right;"></p>
+        </div>
+    </div>
+    <script>
+        $(document).ready(function() {
+            $('#get-quote-btn').click(function() {
+                $('#quote-text').text('載入資料中...');
+                $('#quote-author').text('');
+                $.ajax({
+                    url: 'https://api.quotable.io/random',
+                    type: 'GET',
+                    dataType: 'json',
+                    success: function(data) {
+                        $('#quote-text').text('"' + data.content + '"');
+                        $('#quote-author').text('- ' + data.author);
+                    },
+                    error: function() {
+                        $('#quote-text').text('"The only way to do great work is to love what you do."');
+                        $('#quote-author').text('- Steve Jobs');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
