@@ -8,11 +8,11 @@
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <style>
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Microsoft JhengHei", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             background-color: #f4f6f9;
             color: #333;
-            max-width: 700px;
-            margin: 50px auto;
+            max-width: 750px;
+            margin: 40px auto;
             padding: 20px;
         }
         .card {
@@ -53,67 +53,157 @@
             border-left: 5px solid #3498db;
             border-radius: 6px;
             text-align: left;
-            min-height: 80px;
+            min-height: 100px;
         }
         .setup {
             font-size: 1.1em;
             font-weight: bold;
             color: #2c3e50;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
+            white-space: pre-line;
         }
         .punchline {
             font-size: 1.05em;
             color: #e74c3c;
             font-weight: 600;
+            white-space: pre-line;
+        }
+        .joke-link {
+            margin-top: 10px;
+            display: inline-block;
+            color: #3498db;
+            text-decoration: none;
+            font-weight: normal;
+            font-size: 0.9em;
+        }
+        .joke-link:hover {
+            text-decoration: underline;
+        }
+        .source-link {
+            margin-top: 25px;
+            font-size: 0.85em;
+            color: #7f8c8d;
+        }
+        .source-link a {
+            color: #3498db;
+            text-decoration: none;
         }
     </style>
 </head>
 <body>
 
     <div class="card">
-        <h1>Hello, 我是 Hua2307 👋</h1>
+        <h1>Hello👋</h1>
         <p>歡迎來到我建立的個人網站</p>
         
         <hr style="border: 0; border-top: 1px solid #eee; margin: 25px 0;">
 
-        <h3>💻 jQuery Ajax 隨機程式笑話 API</h3>
-        <p>點擊下方按鈕，會透過 jQuery Ajax 向公開 API 請求笑話 JSON 資料：</p>
+        <h3>經典冷笑話與諧音梗庫 (jQuery Ajax 實作)</h3>
+        <p>點擊下方按鈕，會透過 jQuery 動態處理 JSON 資料庫中的 62 個精選冷笑話：</p>
         
-        <button id="get-joke-btn" class="btn">來個工程師笑話！</button>
+        <button id="get-joke-btn" class="btn">🎲 隨機來個冷笑話！</button>
 
         <div id="joke-container">
             <div id="joke-setup" class="setup">點擊按鈕載入笑話...</div>
             <div id="joke-punchline" class="punchline"></div>
+            <div id="joke-extra"></div>
+        </div>
+
+        <div class="source-link">
+            笑話文本來源：<a href="https://wayne265265.pixnet.net/blog/posts/14216422544" target="_blank">經典笑話集錦 (Pixnet)</a>
         </div>
     </div>
 
     <script>
-        $(document).ready(function() {
-            $('#get-joke-btn').click(function() {
+        // 完整的 62 個冷笑話與諧音梗資料庫
+        const allJokes = [
+            { id: 1, setup: "1. 先進船的人會先說什麼？", punchline: "會說 online...\n因為仙境傳說 online" },
+            { id: 2, setup: "2. 有一天牙籤A跟牙籤B在馬路上相遇，突然一隻刺蝟快速的經過，牙籤A就對牙籤B說：", punchline: "乾，我的公車過了..." },
+            { id: 3, setup: "3. 醫生問小明：如果把你一邊耳朵割掉你會怎麼樣？\n小明：我會聽不見\n醫生又問：那再割掉另一個耳朵呢？\n小明：我會看不見\n醫生問他為什麼...", punchline: "小明：因為我有戴眼鏡" },
+            { id: 4, setup: "4. 有一天小美對小明說：「你能為我而死嗎？」", punchline: "結果小明很驚訝的慢慢把手伸進耳朵...\n(餵我耳屎)" },
+            { id: 5, setup: "5. 客人吃完東西服務生問：那我收囉？\n客人：好", punchline: "然後服務生就開始跳舞了\n(收囉 = solo)" },
+            { id: 6, setup: "6. 有個人對著山洞大喊：嗚郎滴欸某？？\n山洞裡有聲音回答：嗚～", punchline: "然後他就被火車撞死了" },
+            { id: 7, setup: "7. 有一天有個帥哥走在路上，一個阿嬤突然上前搭訕說「帥哥，你超會搭耶」", punchline: "然後帥哥就冒煙了\n(台語：超會搭 = 烤焦了)" },
+            { id: 8, setup: "8. 大嘴魚的故事：\n有一天大嘴魚遇到小魚就問：(嘴張大) 小魚小魚你喜歡吃什麼？\n小魚：我喜歡吃浮游生物呀~\n大嘴魚：(嘴張大) 喔~ 是喔\n接著遇到大魚：(嘴張大) 大魚大魚你喜歡吃什麼？\n大魚：我喜歡吃小魚呀~\n大嘴魚：(嘴張大) 喔~ 是喔\n最後遇到了鯊魚，也問他：(嘴張大) 鯊魚鯊魚你喜歡吃什麼？\n鯊魚：我喜歡吃大嘴魚呀~", punchline: "大嘴魚很緊張的說：(嘴巴縮很小快速地說) 喔~ 速喔！" },
+            { id: 9, setup: "9. 有一天小明去圖書館\n小明：我要一碗牛肉麵\n櫃檯：先生 這裡是圖書館 . . .", punchline: "小明：喔喔好（氣音）我要一碗牛肉麵" },
+            { id: 10, setup: "10. 有一天有一隻深海魚，在海裡自由自在得游啊游但他一點也不開心，為什麼？", punchline: "因為他壓力好大" },
+            { id: 11, setup: "11. 哈利波特裡面誰最有主見？", punchline: "A : 佛地魔，因為他不會被牽著鼻子走" },
+            { id: 12, setup: "12. 有一天父親拿了一跟筷子給兒子要他折斷，兒子一折就斷說「這很容易辦到。」\n接著父親拿出三隻筷子要他折斷，兒子一折就斷「這很容易辦到。」\n接著父親拿出三十隻筷子要他折斷，兒子還是一折就斷：「爸，你到底要幹嘛？」", punchline: "父親：「沒事。」" },
+            { id: 13, setup: "13. 吳國將軍甘興因為割東西時不小心割壞孫權心愛的桌子，孫權生氣要斬首他。\n軍師周瑜想方法救甘興，讓全國人在割東西前先在桌上墊一張紙，孫權原諒了甘興。", punchline: "這就是全國電子「就甘心」的由來" },
+            { id: 14, setup: "14. 有一天郝棒棒、郝美麗、郝帥氣三個人去游泳結果都溺水了，郝帥氣因為會游泳先把郝美麗救上岸，郝美麗就問郝帥氣：", punchline: "「啊不救郝棒棒？」" },
+            { id: 15, setup: "15. 愚公臨死前召集兒子來到床邊虛弱的說：「移山…移山………」", punchline: "兒子：「亮晶晶？」\n愚公卒。" },
+            { id: 16, setup: "16. 劉備 字玄德\n張飛 字翼德\n\n五佰字？？", punchline: "心得" },
+            { id: 17, setup: "17. 有一天小明他爸很渴就叫小明幫他倒水，但小明遲遲沒去，小明爸說：「你是要逼爸渴死嗎？」", punchline: "於是小明就開始 B Box 了" },
+            { id: 18, setup: "18. 有一天張飛和關羽快樂的在草地上騎馬，關羽不知道前方是懸崖\n張飛對關羽大叫：「你快勒馬！」\n關羽回頭對張飛說：「我很快樂！」", punchline: "於是關羽就掉下崖了...." },
+            { id: 19, setup: "19. 桃園三結義那天，張飛很滿意自己寫的字，轉頭對關羽說：「我字好醜」", punchline: "於是關羽對張飛說：「好醜你好，我字雲長」" },
+            { id: 20, setup: "20. 為什麼兩隻螞蟻在沙灘上行進沒有足跡？\n為什麼小明沒有開冰箱就知道冰箱裡有螞蟻？", punchline: "因為他們騎腳踏車！\n因為冰箱外停著螞蟻的腳踏車！" },
+            { id: 21, setup: "21. 把外勞關在家猜一個地名：", punchline: "索馬利亞" },
+            { id: 22, setup: "22. 為什麼衣索比亞沒有藥局？", punchline: "因為醫生說空腹不能吃藥" },
+            { id: 23, setup: "23. 在學校教官要找李鴻毅，不知道他是哪一班的，找學生問：「李鴻毅幾班？」", punchline: "學生：「逮金？」\n(大金廣告詞：日本一級棒大金！)", url: "https://www.youtube.com/watch?v=izmg1bOYkDE", linkText: "🎬 觀看大金廣告經典影片" },
+            { id: 24, setup: "24. 樹長到超過一千年稱之為千年神木，那超過千年的呢？", punchline: "超齡老木" },
+            { id: 25, setup: "25. 有一天Y跟X走在路上，突然看到U哭得很傷心，Y就走過去問U說：", punchline: "uniqlo" },
+            { id: 26, setup: "26. 病人看醫生問：為啥我的雞雞是螺旋狀？醫生無解。\n病人上廁所看到隔壁上完都抖一抖，學著抖一抖就變直了！\n醫生驚訝問怎麼變回來的？\n病人：剛剛學別人抖一抖就變直了！\n醫生：那你之前上完都怎麼做？", punchline: "病人：我之前都把他扭乾" },
+            { id: 27, setup: "27. 小美遇到一隻兇殘的大烏龜把她攔下來，小美說：你要劫財還是劫色我都給你拜託饒我一命！結果烏龜說了什麼？", punchline: "「傑尼傑尼」" },
+            { id: 28, setup: "28. 有一天軟糖難過的哭了：", punchline: "然後他就變成 QQ 軟糖了" },
+            { id: 29, setup: "29. 有天醫生跟小明說：很抱歉得告訴你一個壞消息，你不能打手槍了\n小明：為什麼ㄚㄚㄚㄚㄚ", punchline: "醫生：因為你他媽現在在看診" },
+            { id: 30, setup: "30. 有一對情侶吵架，女生很生氣的奪門而出：", punchline: "然後男生就很快速的跑出去...把門奪回來...." },
+            { id: 31, setup: "31. 瞎子跟瘸子相約騎車，瞎子騎車瘸子看路。瘸子看到前面有大深溝大喊：溝溝溝！\n瞎子回他：啊勒啊勒啊勒！", punchline: "然後兩人一起掉入深溝中....", url: "https://www.youtube.com/watch?v=8BkYKwHLXiU", linkText: "🎵 點此聽經典名曲 La Copa de la Vida" },
+            { id: 32, setup: "32. 你知道嗎？", punchline: "在非洲不用手機也可以玩部落衝突" },
+            { id: 33, setup: "33. 班上李美紅不怕蟑螂。老師問：「每個人都有害怕的時候，像老師就很怕蟑螂，你們有沒有人敢抓蟑螂的呢？」\n小明很快舉手用不太流利的國語回答：", punchline: "「老師李美紅敢啦！」\n(然後小明就在訓導處了)" },
+            { id: 34, setup: "34. 小明遇到女神。\n女神：實現你一個願望\n小明：想要一隻獨角獸\n女神：太不實際了換一個？\n小明：那想要一位女朋友", punchline: "女神：你想要什麼顏色的獨角獸？" },
+            { id: 35, setup: "35. 洗衣和洗褲出去逛街留洗襪在家，出門前家裡有一坨大便，回來後大便不見了，猜是誰把大便吃掉了？", punchline: "回答說：「洗襪！」（台語：是我）" },
+            { id: 36, setup: "36. 為何得癌症的人特別健談？", punchline: "因為他們都有話聊 (化療)" },
+            { id: 37, setup: "37. 奴隸不能做什麼事情？", punchline: "A : 煎蛋\n(修煉愛情的悲歡~我們這些奴隸不煎蛋)" },
+            { id: 38, setup: "38. 平地的貓咪都會喵喵叫，那山上的貓呢？", punchline: "A : 喵的拉" },
+            { id: 39, setup: "39. 為什麼小智去看車時，業務會被電死？\n業務：請問您的預算和廠牌？", punchline: "小智：10萬，福特！(皮卡丘：10萬伏特！)" },
+            { id: 40, setup: "40. 面試官：如果把自己比喻為一種動物，你會是哪一種？\n小明：鸚鵡\n面試官：喔？為什麼是鸚鵡呢？", punchline: "小明：喔？為什麼是鸚鵡呢？\n面試官：......" },
+            { id: 41, setup: "41. 小明想放屁，對小美說：你知道啄木鳥叫聲嗎？讓我模仿給你聽~(邊模仿邊放屁)\n小明：這樣你知道啄木鳥怎樣叫了吧！", punchline: "小美：不好意思，你剛剛放屁太大聲我沒聽到\n小明：......" },
+            { id: 42, setup: "42. 牧場主人對牛說：今天你就自己擠牛奶吧！", punchline: "牛：我真是自取其乳(辱)啊！" },
+            { id: 43, setup: "43. 小明吃臭豆腐問：老闆，這臭豆腐怎麼那麼軟？", punchline: "老闆：因為你沒認真吃啊！認真就酥(輸)了！" },
+            { id: 44, setup: "44. 皮卡丘走路怎麼說？", punchline: "A : 兵乓乒乓乒乓乒乓乒乓\n(丘為身體，乒乓像左右腳走路)" },
+            { id: 45, setup: "45. 一條褲子可以穿20年，猜一地名 (日本)：", punchline: "A : 神奈川 (神耐穿)" },
+            { id: 46, setup: "46. 什麼人最容易被綁架？", punchline: "A : 模範生，因為他們都是好榜樣~(好綁樣)" },
+            { id: 47, setup: "47. 麵包超人扭到腳會變成什麼？", punchline: "A : 牛角麵包 (扭腳麵包)" },
+            { id: 48, setup: "48. 小華：玉皇大帝，千手觀音為什麼還沒到呢？", punchline: "玉皇大帝：因為她還在洗手..." },
+            { id: 49, setup: "49. 為什麼吃完鮭魚肚子會痛？", punchline: "因為鮭魚在胃食道逆流..." },
+            { id: 50, setup: "50. 為什麼台灣獼猴敢打黑道老大？", punchline: "因為台灣獼猴是台灣特有種 🤣" },
+            { id: 51, setup: "51. 為什麼鎖匠比大學生更有學問？", punchline: "因為他是研究鎖的 (研究所)" },
+            { id: 52, setup: "52. 老鷹的各種名字：\n一個老鷹：eagle\n兩個老鷹：兩gle\n老鷹很熱：熱gle\n老鷹很冷：冰gle", punchline: "老鷹上網查資料：google" },
+            { id: 53, setup: "53. 三國裡誰最像啄木鳥？", punchline: "A: 董卓 (懂啄)" },
+            { id: 54, setup: "54. 天竺鼠車車的小孩叫什麼？", punchline: "A: PUI孩 (屁孩台語發音)" },
+            { id: 55, setup: "55. 姓陳的人英文名字不能是什麼？", punchline: "A: Jessica 跟 Monica\n(台語：J係咖稱 / 摸你咖稱)" },
+            { id: "55.1", setup: "55.1 「這是腳」的英文怎麼說？", punchline: "A: Jessica (台語：J係咖)" },
+            { id: 56, setup: "56. 孫悟空金箍棒被妖怪偷走，叫出土地公問：土地公，我老孫的金箍棒在哪裡？", punchline: "土地公：大聖爺，您的金箍棒就棒在特別適合您的髮型！" },
+            { id: 57, setup: "57. 女士：幫我辦會員，我姓陳，名字是美麗的相反\n服務員：陳醜陋嗎？！", punchline: "女士：麗美...\n服務員：喔喔好的 😅 非常抱歉..." },
+            { id: 58, setup: "58. 你知道屈原投江後在人生最後一刻說了什麼嗎？", punchline: "屈原：偶..偶溺江 😝\n(日語：お兄ちゃん / 歐尼醬)" },
+            { id: 59, setup: "59. 在動物園抽煙哪一種動物最害怕？", punchline: "火雞，因為抽煙之前要先準備打火機 (火雞)" },
+            { id: 60, setup: "60. 哪一個藝人在雷雨天才會出現？", punchline: "洪榮宏，因為轟隆轟" },
+            { id: 61, setup: "61. 達文西密碼的上面是什麼？", punchline: "A: 達文西帳號" },
+            { id: 62, setup: "62. 九班跟十班差在哪裡？", punchline: "A: 一個是台語，一個是國語\n(石斑魚台語為九班)" }
+        ];
+
+        $(document).ready(function() {$('#get-joke-btn').click(function() {
                 $('#joke-setup').text('載入笑話中...');
                 $('#joke-punchline').text('');
+                $('#joke-extra').empty();
 
-                // 發送 jQuery Ajax 請求
-                $.ajax({
-                    url: 'https://official-joke-api.appspot.com/jokes/programming/random',
-                    type: 'GET',
-                    dataType: 'json',
-                    success: function(data) {
-                        // 回傳的是陣列，取第一個笑話物件
-                        var joke = data[0];
-                        $('#joke-setup').text('Q: ' + joke.setup);
-                        
-                        // 稍微延遲 0.4 秒顯示笑點，增加趣味感
-                        setTimeout(function() {
-                            $('#joke-punchline').text('A: ' + joke.punchline);
-                        }, 400);
-                    },
-                    error: function() {
-                        // 備用笑話以防 API 異常
-                        $('#joke-setup').text('Q: Why do Java programmers have to wear glasses?');
-                        $('#joke-punchline').text('A: Because they don\'t C#!');
-                    }
-                });
+                // 使用 jQuery 非同步處理資料呈現
+                setTimeout(function() {
+                    const randomIndex = Math.floor(Math.random() * allJokes.length);
+                    const joke = allJokes[randomIndex];
+
+                    $('#joke-setup').text(joke.setup);
+                    
+                    setTimeout(function() {
+                        $('#joke-punchline').text(joke.punchline);
+
+                        // 如果笑話含有影片連結則自動動態附上
+                        if (joke.url) {
+                            const linkHtml = `<a class="joke-link" href="${joke.url}" target="_blank">${joke.linkText}</a>`;
+                            $('#joke-extra').html(linkHtml);
+                        }
+                    }, 350);
+                }, 150);
             });
         });
     </script>
